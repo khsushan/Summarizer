@@ -36,23 +36,23 @@ public class HtmlReader {
         return content;
     }
 
-    public static void main(String[] args) {
-        try {
-            //readHTML("http://www.dailynews.lk/?q=2016/03/09/local/thai-deputy-prime-minister-meets-foreign-minister");
-            StringBuilder htmlContent =
-                    readHTML("http://www.dailynews.lk/?q=2016/03/09/local/thai-deputy-prime-minister-meets-foreign-minister");
-            LexRank lexRank = new LexRank(new StringBuilder[]{htmlContent});
-            double[] lexScore = lexRank.getLexScore();
-
-            Vector.printVector(lexRank.getLexScore());
-            List<String> allSentence = lexRank.getAllSentence();
-            for (int i = 0; i < allSentence.size();i++){
-                System.out.println(allSentence.get(i)+"======================="+lexScore[i]);
-            }
-            //readHTML("http://www.nytimes.com/2016/03/10/world/middleeast/obama-criticizes-the-free-riders-among-americas-allies.html?_r=0");
-            //readHTML("http://www.dailynews.lk/?q=2016/03/10/local/basil-rajapaksa-released-bail");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            //readHTML("http://www.dailynews.lk/?q=2016/03/09/local/thai-deputy-prime-minister-meets-foreign-minister");
+//            StringBuilder htmlContent =
+//                    readHTML("http://www.dailynews.lk/?q=2016/03/09/local/thai-deputy-prime-minister-meets-foreign-minister");
+//            LexRank lexRank = new LexRank(new StringBuilder[]{htmlContent});
+//            double[] lexScore = lexRank.getLexScore();
+//
+//            Vector.printVector(lexRank.getLexScore());
+//            List<String> allSentence = lexRank.getAllSentence();
+//            for (int i = 0; i < allSentence.size();i++){
+//                System.out.println(allSentence.get(i)+"======================="+lexScore[i]);
+//            }
+//            //readHTML("http://www.nytimes.com/2016/03/10/world/middleeast/obama-criticizes-the-free-riders-among-americas-allies.html?_r=0");
+//            //readHTML("http://www.dailynews.lk/?q=2016/03/10/local/basil-rajapaksa-released-bail");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
