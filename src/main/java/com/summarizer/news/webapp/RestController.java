@@ -41,7 +41,7 @@ public class RestController {
     }
 
     @POST
-    @Path("/test2")
+    @Path("/getSentences")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postStudentRecord(JSON_Response json_response){
         String result = "Record entered: "+ json_response;
