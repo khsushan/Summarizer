@@ -6,6 +6,7 @@ package com.summarizer.news.webapp;
 
 public class JSON_Response {
     private String[] urls;
+    private String keyword;
 
     public String[] getUrls() {
         return urls;
@@ -15,14 +16,24 @@ public class JSON_Response {
         this.urls = urls;
     }
 
+
+
     @Override
     public String toString()
     {
         StringBuilder str = new StringBuilder();
-        for (String url: this.urls) {
+        for (String url: this.getUrls()) {
             str.append(url);
             str.append("\n");
         }
         return  str.toString();
+    }
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 }
