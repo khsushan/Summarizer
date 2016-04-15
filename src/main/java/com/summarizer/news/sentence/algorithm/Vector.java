@@ -12,14 +12,6 @@ public class Vector {
         return dotPrd;
     }
 
-    public static double magnitude(double[] v) {
-        double mag = 0.0;
-        for (int i = 0; i < v.length; i++) {
-            mag += v[i] * v[i];
-        }
-        return Math.sqrt(mag);
-    }
-
     public static double difference(double [] v1, double [] v2){
         double diff = 0.0;
         for (int i = 0; i < v1.length; i++) {
