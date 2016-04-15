@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by ushan on 3/16/16.
  */
-public class LexRank {
+public class SentenceScoreCalculator {
     private List<String[]> wordsInDocuments = null;
     private List<String> allWords = null;
     private List<String> allSentences = null;
@@ -22,7 +22,7 @@ public class LexRank {
     private final double treshhold = 0.1;
     private double[] lexScore;
 
-    public LexRank(StringBuilder[] documents) {
+    public SentenceScoreCalculator(StringBuilder[] documents) {
         this.documents = documents;
         sentenceExtractor = new SentenceExtractor();
         words = new ArrayList<Word>();
