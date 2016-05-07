@@ -51,7 +51,6 @@ public class SentenceScoreCalculator {
         calculateTF();
         calculateIDF();
         calculateLexRankScore();
-        powerMethod(0.85);
     }
 
     private void calculateLexRankScore() {
@@ -75,6 +74,7 @@ public class SentenceScoreCalculator {
                 cosineMaxtrics[i][j] = cosineMaxtrics[i][j]/degrees[i];
             }
         }
+        powerMethod(0.85);
     }
 
     private double compute_cosine(int sentence1Index, int sentence2Index) {
@@ -105,9 +105,9 @@ public class SentenceScoreCalculator {
         double magDiff = 0.85;
         double size = (double)allSentences.size();
         lexScore = new double[allSentences.size()];
-        double [] lexScoreNext = new double[allSentences.size()];
+        double [] lexScoreNext = new double[(int) size];
         for (int i = 0; i < allSentences.size(); i++) {
-            lexScore[i] = 1 / (double)allSentences.size();
+            lexScore[i] = 1 / size;
         }
         while (magDiff > treshhold) {
             for (int i = 0; i < allSentences.size(); i++) {
@@ -117,7 +117,7 @@ public class SentenceScoreCalculator {
             }
             magDiff = Vector.difference(lexScoreNext, lexScore);
             Vector.printVector(lexScoreNext);
-            System.arraycopy(lexScoreNext, 0, lexScore, 0, allSentences.size());
+            System.arraycopy(lexScoreNext, 0, lexScore, 0, (int) size);
         }
     }
 
