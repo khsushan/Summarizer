@@ -3,6 +3,7 @@ package com.summarizer.news.sentence.algorithm;
 import com.summarizer.news.model.Word;
 import com.summarizer.news.sentence.extractor.SentenceExtractor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class SentenceScoreCalculator {
     private final double treshhold = 0.1;
     private double[] lexScore;
 
-    public SentenceScoreCalculator(StringBuilder[] documents) {
+    public SentenceScoreCalculator(StringBuilder[] documents) throws IOException {
         this.documents = documents;
         sentenceExtractor = new SentenceExtractor();
         words = new ArrayList<Word>();
@@ -37,9 +38,8 @@ public class SentenceScoreCalculator {
         return this.allSentences;
     }
 
-    private void init() {
+    private void init() throws IOException {
         for (StringBuilder document : documents) {
-            //sentenceExtractor.extractSentenceInDocument(document);
             sentenceExtractor.getExtractedWordInGivenDocument(document);
         }
         this.wordsInDocuments = sentenceExtractor.getWordsInDocuments();
