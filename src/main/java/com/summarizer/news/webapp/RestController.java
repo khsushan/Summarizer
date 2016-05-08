@@ -9,6 +9,8 @@ import com.summarizer.news.data.api.API_Client;
 import com.summarizer.news.data.html.HtmlReader;
 import com.summarizer.news.sentence.algorithm.SentenceScoreCalculator;
 import com.summarizer.news.sentence.algorithm.Vector;
+import org.apache.log4j.Logger;
+import org.jsoup.HttpStatusException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -17,22 +19,27 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
+
 @Path("/controller")
 public class RestController {
+    private Logger logger = Logger.getLogger("RestController");
     @POST
     @Path("/test")
     @Consumes("text/plain")
     public Response getMessage(String url) {
         StringBuilder output = new StringBuilder();
-        //readHTML("http://www.dailynews.lk/?q=2016/03/09/local/thai-deputy-prime-minister-meets-foreign-minister");
         StringBuilder htmlContent = null;
         try {
             htmlContent = HtmlReader.readHTML(url);
-            //readHTML("http://www.dailynews.lk/?q=2016/03/09/local/thai-deputy-prime-minister-meets-foreign-minister");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error while reading html content "+e.getMessage());
         }
-        SentenceScoreCalculator sentenceScoreCalculator = new SentenceScoreCalculator(new StringBuilder[]{htmlContent});
+        SentenceScoreCalculator sentenceScoreCalculator = null;
+        try {
+            sentenceScoreCalculator = new SentenceScoreCalculator(new StringBuilder[]{htmlContent});
+        } catch (IOException e) {
+            logger.error("Error while calculating score "+e.getMessage());
+        }
         double[] lexScore = sentenceScoreCalculator.getLexScore();
 
         Vector.printVector(sentenceScoreCalculator.getLexScore());
@@ -58,9 +65,14 @@ public class RestController {
                 documents[i] =  htmlContent;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error while reading html content"+e.getMessage());
         }
-        SentenceScoreCalculator sentenceScoreCalculator = new SentenceScoreCalculator(documents);
+        SentenceScoreCalculator sentenceScoreCalculator = null;
+        try {
+            sentenceScoreCalculator = new SentenceScoreCalculator(documents);
+        } catch (IOException e) {
+            logger.error("Error while calculating senetence score "+e.getMessage());
+        }
         double[] lexScore = sentenceScoreCalculator.getLexScore();
 
         Vector.printVector(sentenceScoreCalculator.getLexScore());
@@ -81,20 +93,30 @@ public class RestController {
         JsonArray newsUrls = null;
         StringBuilder[] documents = null;
         try {
-            String keyword = json_response.getKeyword().replace(" ","%20");
-            newsUrls = API_Client.getNewsUrls(keyword);
+            newsUrls = API_Client.getNewsUrls(json_response.getKeyword());
             documents = new StringBuilder[3];
-            for(int i = 0; i < 2;i++){
+            int limit =4;
+            for(int i = 0; i < limit;i++){
                 JsonObject resultJOB = newsUrls.get(i).getAsJsonObject();
-                String newsUrl = resultJOB.get("unescapedUrl").getAsString();
-                System.out.println(newsUrl);
-                StringBuilder  htmlContent = HtmlReader.readHTML(newsUrl);
-                documents[i] =  htmlContent;
+                String newsUrl = resultJOB.get("Url").getAsString();
+                logger.info(newsUrl);
+                try {
+                    StringBuilder htmlContent = HtmlReader.readHTML(newsUrl);
+                    documents[i] = htmlContent;
+                }catch (HttpStatusException ex){
+                    logger.error("Error while reading html link "+newsUrl+" "+ex.getMessage());
+                    limit++;
+                }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error while reading html document "+e.getMessage());
         }
-        SentenceScoreCalculator sentenceScoreCalculator = new SentenceScoreCalculator(documents);
+        SentenceScoreCalculator sentenceScoreCalculator = null;
+        try {
+            sentenceScoreCalculator = new SentenceScoreCalculator(documents);
+        } catch (IOException e) {
+            logger.error("Error while calculating senetence score "+e.getMessage());
+        }
         double[] lexScore = sentenceScoreCalculator.getLexScore();
 
         Vector.printVector(sentenceScoreCalculator.getLexScore());
