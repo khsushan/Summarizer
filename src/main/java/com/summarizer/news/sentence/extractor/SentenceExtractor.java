@@ -18,8 +18,8 @@ public class SentenceExtractor {
     private List<String> allSentences = new ArrayList<String>();
     private static ArrayList<String> stopwords;
 
-    public  void getExtractedWordInGivenDocument(StringBuilder builder) throws IOException, InterruptedException {
-        if(builder != null){
+    public void getExtractedWordInGivenDocument(StringBuilder builder) throws IOException, InterruptedException {
+        if (builder != null) {
             Reader reader = new StringReader(builder.toString());
             DocumentPreprocessor dp = new DocumentPreprocessor(reader);
             for (List<HasWord> sentence : dp) {
@@ -28,7 +28,7 @@ public class SentenceExtractor {
                 String[] tokenizedTerms = sentenceString.toString().
                         replaceAll("[\\W&&[^\\s]]", "").split("\\W+");//to get individual terms
                 for (String term : tokenizedTerms) {
-                    if (!allWords.contains(term) && !StopwordExtractor.getStopWords().contains(term)) {  //avoid duplicate entry
+                    if (!allWords.contains(term) && !StopwordLoader.getStopWords().contains(term)) {  //avoid duplicate entry
                         allWords.add(term);
                     }
                 }
@@ -37,18 +37,15 @@ public class SentenceExtractor {
         }
     }
 
-    public  List<String[]> getWordsInDocuments(){
-        return  this.wordsInDocuments;
+    public List<String[]> getWordsInDocuments() {
+        return this.wordsInDocuments;
     }
 
-    public  List<String> getAllWords(){
-        return  this.allWords;
+    public List<String> getAllWords() {
+        return this.allWords;
     }
 
-    public  List<String> getAllSentences(){
-        return  this.allSentences;
+    public List<String> getAllSentences() {
+        return this.allSentences;
     }
-
-
-
 }
