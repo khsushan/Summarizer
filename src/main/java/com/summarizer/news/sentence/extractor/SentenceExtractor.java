@@ -18,7 +18,7 @@ public class SentenceExtractor {
     private List<String> allSentences = new ArrayList<String>();
     private static ArrayList<String> stopwords;
 
-    public  void getExtractedWordInGivenDocument(StringBuilder builder) throws IOException {
+    public  void getExtractedWordInGivenDocument(StringBuilder builder) throws IOException, InterruptedException {
         if(builder != null){
             Reader reader = new StringReader(builder.toString());
             DocumentPreprocessor dp = new DocumentPreprocessor(reader);
@@ -28,15 +28,13 @@ public class SentenceExtractor {
                 String[] tokenizedTerms = sentenceString.toString().
                         replaceAll("[\\W&&[^\\s]]", "").split("\\W+");//to get individual terms
                 for (String term : tokenizedTerms) {
-                    if (!allWords.contains(term) && !getStopWords().contains(term)) {  //avoid duplicate entry
+                    if (!allWords.contains(term) && !StopwordExtractor.getStopWords().contains(term)) {  //avoid duplicate entry
                         allWords.add(term);
                     }
-
                 }
                 wordsInDocuments.add(tokenizedTerms);
             }
         }
-
     }
 
     public  List<String[]> getWordsInDocuments(){
@@ -51,20 +49,6 @@ public class SentenceExtractor {
         return  this.allSentences;
     }
 
-    public static ArrayList getStopWords() throws IOException {
-
-        if(stopwords == null){
-            stopwords = new ArrayList<String>();
-            File stopword = new File("src/main/resources/stopword/english/Stopword.txt");
-            BufferedReader stopWordBufferReader =  new BufferedReader(new FileReader(stopword));
-            while (stopWordBufferReader.readLine() != null){
-                stopwords.add(stopWordBufferReader.readLine());
-            }
-            return stopwords;
-        }else {
-            return stopwords;
-        }
-    }
 
 
 }
