@@ -11,8 +11,8 @@ import java.util.List;
  * Created by ushan on 3/16/16.
  */
 public class SentenceScoreCalculator {
-    private List<String[]> wordsInDocuments = null;
-    private List<String> allWords = null;
+    private List<String[]> allWordsInDocuments = null;
+    private List<String> uniqueWords = null;
     private List<String> allSentences = null;
     private StringBuilder[] documents = null;
     private SentenceExtractor sentenceExtractor;
@@ -23,7 +23,7 @@ public class SentenceScoreCalculator {
     private final double treshhold = 0.1;
     private double[] lexScore;
 
-    public SentenceScoreCalculator(StringBuilder[] documents) throws IOException {
+    public SentenceScoreCalculator(StringBuilder[] documents) throws IOException, InterruptedException {
         this.documents = documents;
         sentenceExtractor = new SentenceExtractor();
         words = new ArrayList<Word>();
@@ -38,16 +38,16 @@ public class SentenceScoreCalculator {
         return this.allSentences;
     }
 
-    private void init() throws IOException {
+    private void init() throws IOException, InterruptedException {
         for (StringBuilder document : documents) {
             sentenceExtractor.getExtractedWordInGivenDocument(document);
         }
-        this.wordsInDocuments = sentenceExtractor.getWordsInDocuments();
-        this.allWords = sentenceExtractor.getAllWords();
+        this.allWordsInDocuments = sentenceExtractor.getAllWordsInDocuments();
+        this.uniqueWords = sentenceExtractor.getUniqueWords();
         this.allSentences = sentenceExtractor.getAllSentences();
         this.cosineMaxtrics = new double[allSentences.size()][allSentences.size()];
         this.degrees = new double[allSentences.size()];
-        calculateMaxOccarunce();
+        //calculateMaxOccarunce();
         calculateTF();
         calculateIDF();
         calculateLexRankScore();
@@ -88,10 +88,10 @@ public class SentenceScoreCalculator {
                 numerator += Math.pow(wordObj.getTf_value() * wordObj.getTf_value() * wordObj.getIdf_value(), 2);
             }
         }
-        String[] sentence1 = wordsInDocuments.get(sentence1Index);
+        String[] sentence1 = allWordsInDocuments.get(sentence1Index);
         double sentence1Val = calculateTotalTF_IDF_Square(sentence1);
 
-        String[] sentence2 = wordsInDocuments.get(sentence2Index);
+        String[] sentence2 = allWordsInDocuments.get(sentence2Index);
         double sentence2Val = calculateTotalTF_IDF_Square(sentence2);
 
         if(sentence1Val > 0.0 && sentence2Val > 0.0){
@@ -123,12 +123,11 @@ public class SentenceScoreCalculator {
 
 
     private void calculateTF() {
-        //calculate the word count and devided it using max word
         double tf_value = 0.00;
-        for (String word : allWords) {
+        for (String word : uniqueWords) {
             Word wordObj = new Word();
             wordObj.setValue(word);
-            tf_value = calculateOccarunce(word) / this.max_occarance;
+            tf_value = calculateOccarunce(word) / allWordsInDocuments.size();
             wordObj.setTf_value(tf_value);
             words.add(wordObj);
         }
@@ -139,7 +138,7 @@ public class SentenceScoreCalculator {
         double idf_value = 0;
         for (Word word : words) {
             total_sentence = calculateSentenceOccarunce(word.getValue());
-            idf_value = Math.log(wordsInDocuments.size() / (1 + total_sentence));
+            idf_value =1+ Math.log(4.0 / total_sentence);
             word.setIdf_value(idf_value);
         }
     }
@@ -147,9 +146,9 @@ public class SentenceScoreCalculator {
 
     private double calculateOccarunce(String word) {
         double count = 0;
-        for (String[] sentence : wordsInDocuments) {
+        for (String[] sentence : allWordsInDocuments) {
             for (String w : sentence) {
-                if (w.equals(word)) {
+                if (w.equalsIgnoreCase(word)) {
                     count++;
                 }
             }
@@ -159,34 +158,17 @@ public class SentenceScoreCalculator {
 
     private double calculateSentenceOccarunce(String word) {
         double count = 0;
-        for (String[] sentence : wordsInDocuments) {
-            for (String w : sentence) {
-                if (w.equals(word)) {
-                    count++;
-                    break;
-                }
+        for(StringBuilder document : documents){
+            if(document.toString().contains(word)){
+                count++;
             }
         }
         return count;
     }
 
-    /**
-     * This will return the max tf value which is which is in the sentence
-     */
-    private void calculateMaxOccarunce() {
-        double temp = 0;
-        for (String word : allWords) {
-            temp = calculateOccarunce(word);
-            if (temp > this.max_occarance) {
-                this.max_occarance = temp;
-            }
-        }
-    }
-
-
     private ArrayList<String> getCommonWords(int index1, int index2) {
-        String[] sentence1 = wordsInDocuments.get(index1);
-        String[] sentence2 = wordsInDocuments.get(index2);
+        String[] sentence1 = allWordsInDocuments.get(index1);
+        String[] sentence2 = allWordsInDocuments.get(index2);
         ArrayList<String> commonWords = new ArrayList<String>();
         for (int i = 0; i < sentence1.length; i++) {
             for (int j = 0; j < sentence2.length; j++) {
