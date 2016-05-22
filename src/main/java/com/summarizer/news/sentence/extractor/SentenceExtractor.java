@@ -12,11 +12,11 @@ import java.util.List;
  * Created by ushan on 3/5/16.
  */
 public class SentenceExtractor {
-    private List<String[]> wordsInDocuments = new ArrayList<String[]>(); //this will hold all the words in document
-    private List<String> allWords =
-            new ArrayList<String>(); //this all words set will hold all the unique words in wordsInDocuments
+    private List<String[]> allWordsInDocuments = new ArrayList<String[]>(); //this will hold all the words in document
+    private List<String> uniqueWords =
+            new ArrayList<String>(); //this all words set will hold all the unique words in allWordsInDocuments
     private List<String> allSentences = new ArrayList<String>();
-    private static ArrayList<String> stopwords;
+    private List<String> stopWords = null;
 
     public void getExtractedWordInGivenDocument(StringBuilder builder) throws IOException, InterruptedException {
         if (builder != null) {
@@ -27,22 +27,22 @@ public class SentenceExtractor {
                 allSentences.add(sentenceString.toString());
                 String[] tokenizedTerms = sentenceString.toString().
                         replaceAll("[\\W&&[^\\s]]", "").split("\\W+");//to get individual terms
+                stopWords = StopwordLoader.getStopWords();
                 for (String term : tokenizedTerms) {
-                    if (!allWords.contains(term) && !StopwordLoader.getStopWords().contains(term)) {  //avoid duplicate entry
-                        allWords.add(term);
+                    //avoid duplicate entry & stop words
+                    if (!uniqueWords.contains(term) && !stopWords.contains(term)) {
+                        uniqueWords.add(term);
                     }
                 }
-                wordsInDocuments.add(tokenizedTerms);
+                allWordsInDocuments.add(tokenizedTerms);
             }
         }
     }
 
-    public List<String[]> getWordsInDocuments() {
-        return this.wordsInDocuments;
-    }
+    public List<String[]> getAllWordsInDocuments() { return this.allWordsInDocuments; }
 
-    public List<String> getAllWords() {
-        return this.allWords;
+    public List<String> getUniqueWords() {
+        return this.uniqueWords;
     }
 
     public List<String> getAllSentences() {
