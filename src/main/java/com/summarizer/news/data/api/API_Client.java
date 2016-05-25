@@ -17,6 +17,8 @@ import java.util.Base64;
  * Created by ushan on 3/16/16.
  */
 public class API_Client {
+    private static final String AlCHMEY_API_KEY = "be6e8644de0fbe81586ddb2d7fe30b1f5d8c1c1c";
+    private static final String BING_API_KEY = "9KbdApiBCyeSbEJPhFmPf7yD8lnTj/CdDrxFl4G4ZEc";
 
     private   static StringBuilder httpClient(String endpoint, String authenticationKey) throws IOException {
         URL url = new URL(endpoint);
@@ -47,7 +49,7 @@ public class API_Client {
         String query = URLEncoder.encode(keyword, Charset.defaultCharset().name());
         String url =   String.format(bingUrlPattern, query);
         StringBuilder builder = httpClient(url,
-                "9KbdApiBCyeSbEJPhFmPf7yD8lnTj/CdDrxFl4G4ZEc");
+               BING_API_KEY);
 
         JsonParser jsonParser =  new JsonParser();
         JsonObject responseObj = (JsonObject) jsonParser.parse(builder.toString());
@@ -65,7 +67,15 @@ public class API_Client {
         JsonObject responseObj = (JsonObject) jsonParser.parse(builder.toString());
         JsonObject verbObj = responseObj.get("verb").getAsJsonObject();
         JsonArray synArray = verbObj.get("syn").getAsJsonArray();
-        System.out.println(synArray.toString());
+    }
+
+    public static JsonArray getExtractedEntities(String phrase) throws IOException {
+        StringBuilder builder = httpClient("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedNamedEntities?apikey="+AlCHMEY_API_KEY+"&" +
+                "text="+phrase+"&outputMode=json",null);
+        JsonParser jsonParser =  new JsonParser();
+        JsonObject responseObj = (JsonObject) jsonParser.parse(builder.toString());
+        return  responseObj.get("entities").getAsJsonArray();
+
     }
 
 }
