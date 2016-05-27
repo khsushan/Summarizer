@@ -12,7 +12,7 @@ public class CategoryComparator implements Comparator<JsonObject> {
     public int compare(JsonObject o1, JsonObject o2) {
         double relevance1 = o1.get("relevance").getAsDouble();
         double relevance2 = o2.get("relevance").getAsDouble();
-        if(relevance1 > relevance2)
+        if(relevance1 < relevance2)
             return 1;
         else
             return -1;
