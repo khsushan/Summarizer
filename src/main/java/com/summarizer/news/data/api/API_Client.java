@@ -3,10 +3,12 @@ package com.summarizer.news.data.api;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.codehaus.jettison.json.JSONArray;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -19,6 +21,7 @@ import java.util.Base64;
 public class API_Client {
     private static final String AlCHMEY_API_KEY = "be6e8644de0fbe81586ddb2d7fe30b1f5d8c1c1c";
     private static final String BING_API_KEY = "9KbdApiBCyeSbEJPhFmPf7yD8lnTj/CdDrxFl4G4ZEc";
+    private static final String DIFFBOT_API_KEY = "3e370abab3d362393716cfba235c0bf1";
 
     private   static StringBuilder httpClient(String endpoint, String authenticationKey) throws IOException {
         URL url = new URL(endpoint);
@@ -70,12 +73,23 @@ public class API_Client {
     }
 
     public static JsonArray getExtractedEntities(String phrase) throws IOException {
-        StringBuilder builder = httpClient("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedNamedEntities?apikey="+AlCHMEY_API_KEY+"&" +
-                "text="+phrase+"&outputMode=json",null);
+        String urlEncoder = URLEncoder.encode(phrase,"UTF-8");
+        StringBuilder builder = httpClient("http://gateway-a.watsonplatform.net/calls/text/TextGetRankedNamedEntities?" +
+                "apikey="+AlCHMEY_API_KEY+"&text="+urlEncoder+"&outputMode=json",null);
         JsonParser jsonParser =  new JsonParser();
         JsonObject responseObj = (JsonObject) jsonParser.parse(builder.toString());
         return  responseObj.get("entities").getAsJsonArray();
 
+    }
+
+    public static StringBuilder getHTMLContent(String url) throws IOException {
+        String encodedUrl = URLEncoder.encode(url,"UTF-8");
+        StringBuilder builder = httpClient("http://api.diffbot.com/v3/article?token="+DIFFBOT_API_KEY+"" +
+                "&url="+encodedUrl,null);
+        JsonParser jsonParser =  new JsonParser();
+        JsonObject responseObj = (JsonObject) jsonParser.parse(builder.toString());
+        return  new StringBuilder(responseObj.get("objects").
+                getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString());
     }
 
 }
