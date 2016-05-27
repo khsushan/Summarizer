@@ -3,10 +3,8 @@ package com.summarizer.news.sentence.algorithm;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.summarizer.news.comparator.CategoryComparator;
-import com.summarizer.news.comparator.ScoreComparator;
 import com.summarizer.news.data.api.API_Client;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,8 +21,8 @@ import java.util.List;
 public class KnowledgeCreator {
     private static final  String TEMPLATE_PATH =  "src/main/resources/template";
 
-    public String generateKnowledge(String[] senetcnces) throws IOException {
-        HashMap<String, ArrayList<JsonObject>> categories = extractEntites(senetcnces);
+    public String generateKnowledge(StringBuilder phrase) throws IOException {
+        HashMap<String, ArrayList<JsonObject>> categories = extractEntites(phrase);
         CategoryComparator categoryComparator = new CategoryComparator();
         for (String category: categories.keySet()) {
             ArrayList<JsonObject> entities  = categories.get(category);
@@ -33,13 +31,13 @@ public class KnowledgeCreator {
         return  assignToTemplate(categories);
     }
 
-    private HashMap<String, ArrayList<JsonObject>> extractEntites(String[] senetces) throws IOException {
-        StringBuilder phrase = new StringBuilder();
-        for (String sentence:senetces) {
-            phrase.append(sentence);
-            phrase.append(".");
-        }
-        JsonArray extractedEntities = API_Client.getExtractedEntities(phrase.toString());
+    private HashMap<String, ArrayList<JsonObject>> extractEntites(StringBuilder phrase) throws IOException {
+//        StringBuilder phrase = new StringBuilder();
+//        for (String sentence:senetces) {
+//            phrase.append(sentence);
+//            //phrase.append(".");
+//        }
+        JsonArray extractedEntities = API_Client.getExtractedEntities(phrase.toString().trim());
         HashMap<String,ArrayList<JsonObject>> categories = new HashMap<String, ArrayList<JsonObject>>();
         for(int i = 0; i < extractedEntities.size() ; i++){
             JsonObject entity  =  extractedEntities.get(i).getAsJsonObject();
@@ -57,25 +55,25 @@ public class KnowledgeCreator {
     }
 
     private String assignToTemplate(HashMap<String,ArrayList<JsonObject>> pickedEntities) throws IOException {
-        String  type = pickedEntities.get("sport").get(0).get("text").getAsString();
+        String  type = pickedEntities.get("Sport").get(0).get("text").getAsString();
         StringBuilder output = new StringBuilder();
-        if(type.equalsIgnoreCase("cricket")){
-            Path path = Paths.get(TEMPLATE_PATH+"/cricket");
+        if(type.equalsIgnoreCase("T20") || type.equalsIgnoreCase("Cricket") ){
+            Path path = Paths.get(TEMPLATE_PATH+"/cricket.txt");
             List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
-            String firstLine = lines.get(0).replace("country1",pickedEntities.get("country").get(0).get("text").getAsString());
-            firstLine = firstLine.replace("country2",pickedEntities.get("country").get(1).get("text").getAsString());
+            String firstLine = lines.get(0).replace("country1",pickedEntities.get("Country").get(0).get("text").getAsString());
+            firstLine = firstLine.replace("country2",pickedEntities.get("Country").get(1).get("text").getAsString());
             output.append(firstLine);
             output.append("\n");
             String secondLine =  lines.get(1);
-            secondLine = secondLine.replace("country",pickedEntities.get("country").get(0).get("text").getAsString());
+            secondLine = secondLine.replace("country",pickedEntities.get("Country").get(0).get("text").getAsString());
             output.append(secondLine);
             output.append("\n");
             String thirdLine =  lines.get(2);
-            thirdLine = thirdLine.replace("person",pickedEntities.get("person").get(0).get("text").getAsString());
+            thirdLine = thirdLine.replace("person",pickedEntities.get("Person").get(0).get("text").getAsString());
             output.append(thirdLine);
             output.append("\n");
         }else if(type.equalsIgnoreCase("football")){
-
+            System.out.println("Foot ball");
         }
         return output.toString();
     }
