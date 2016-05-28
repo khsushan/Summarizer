@@ -4,7 +4,7 @@ package com.summarizer.news.webapp;
  * Created by Ushan on 3/28/2016.
  */
 
-public class JSON_Response {
+public class JSON_Request {
     private String[] urls;
     private String keyword;
 
