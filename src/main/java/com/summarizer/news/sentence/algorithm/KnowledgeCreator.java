@@ -21,7 +21,7 @@ import java.util.List;
 public class KnowledgeCreator {
     private static final  String TEMPLATE_PATH =  "src/main/resources/template";
 
-    public String generateKnowledge(StringBuilder phrase) throws IOException {
+    public String generateKnowledge(String phrase) throws IOException {
         HashMap<String, ArrayList<JsonObject>> categories = extractEntites(phrase);
         CategoryComparator categoryComparator = new CategoryComparator();
         for (String category: categories.keySet()) {
@@ -31,13 +31,8 @@ public class KnowledgeCreator {
         return  assignToTemplate(categories);
     }
 
-    private HashMap<String, ArrayList<JsonObject>> extractEntites(StringBuilder phrase) throws IOException {
-//        StringBuilder phrase = new StringBuilder();
-//        for (String sentence:senetces) {
-//            phrase.append(sentence);
-//            //phrase.append(".");
-//        }
-        JsonArray extractedEntities = API_Client.getExtractedEntities(phrase.toString().trim());
+    private HashMap<String, ArrayList<JsonObject>> extractEntites(String phrase) throws IOException {
+        JsonArray extractedEntities = API_Client.getExtractedEntities(phrase);
         HashMap<String,ArrayList<JsonObject>> categories = new HashMap<String, ArrayList<JsonObject>>();
         for(int i = 0; i < extractedEntities.size() ; i++){
             JsonObject entity  =  extractedEntities.get(i).getAsJsonObject();
@@ -55,9 +50,9 @@ public class KnowledgeCreator {
     }
 
     private String assignToTemplate(HashMap<String,ArrayList<JsonObject>> pickedEntities) throws IOException {
-        String  type = pickedEntities.get("Sport").get(0).get("text").getAsString();
+        //String  type = pickedEntities.get("Sport").get(0).get("text").getAsString();
         StringBuilder output = new StringBuilder();
-        if(type.equalsIgnoreCase("T20") || type.equalsIgnoreCase("Cricket") ){
+        //if(type.equalsIgnoreCase("T20") || type.equalsIgnoreCase("Cricket") ){
             Path path = Paths.get(TEMPLATE_PATH+"/cricket.txt");
             List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
             String firstLine = lines.get(0).replace("country1",pickedEntities.get("Country").get(0).get("text").getAsString());
@@ -72,9 +67,9 @@ public class KnowledgeCreator {
             thirdLine = thirdLine.replace("person",pickedEntities.get("Person").get(0).get("text").getAsString());
             output.append(thirdLine);
             output.append("\n");
-        }else if(type.equalsIgnoreCase("football")){
-            System.out.println("Foot ball");
-        }
+//        }else if(type.equalsIgnoreCase("football")){
+//            System.out.println("Foot ball");
+//        }
         return output.toString();
     }
 }
