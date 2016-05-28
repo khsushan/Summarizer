@@ -7,25 +7,30 @@ import edu.stanford.nlp.process.DocumentPreprocessor;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by ushan on 3/5/16.
  */
 public class SentenceExtractor {
-    private List<String[]> allWordsInDocuments = new ArrayList<String[]>(); //this will hold all the words in document
-    private List<String> uniqueWords =
+    private static List<String[]> allWordsInDocuments = new ArrayList<String[]>(); //this will hold all the words in document
+    private static List<String> uniqueWords =
             new ArrayList<String>(); //this all words set will hold all the unique words in allWordsInDocuments
-    private List<String> allSentences = new ArrayList<String>();
-    private List<String> stopWords = null;
+    private static List<String> allSentences = new ArrayList<String>();
+    private static List<String> stopWords = null;
 
-    public void getExtractedWordInGivenDocument(StringBuilder builder) throws IOException, InterruptedException {
-        if (builder != null) {
-            Reader reader = new StringReader(builder.toString());
-            DocumentPreprocessor dp = new DocumentPreprocessor(reader);
-            for (List<HasWord> sentence : dp) {
-                String sentenceString = Sentence.listToString(sentence);
-                allSentences.add(sentenceString.toString());
-                String[] tokenizedTerms = sentenceString.toString().
+    public void getExtractedWordInGivenDocument(StringBuilder htmlContent) throws IOException, InterruptedException {
+        if (htmlContent != null) {
+//            Reader reader = new StringReader(builder.toString());
+//            DocumentPreprocessor dp = new DocumentPreprocessor(reader);
+//            for (List<HasWord> sentence : dp) {
+            Pattern re = Pattern.compile("[^.!?\\s][^.!?]*(?:[.!?](?!['\"]?\\s|$)[^.!?]*)*[.!?]?['\"]?(?=\\s|$)",
+                    Pattern.MULTILINE | Pattern.COMMENTS);
+            Matcher reMatcher = re.matcher(htmlContent.toString());
+            while (reMatcher.find()) {
+                allSentences.add(reMatcher.group().toString());
+                String[] tokenizedTerms = reMatcher.group().toString().
                         replaceAll("[\\W&&[^\\s]]", "").split("\\W+");//to get individual terms
                 stopWords = StopwordLoader.getStopWords();
                 for (String term : tokenizedTerms) {
@@ -36,6 +41,7 @@ public class SentenceExtractor {
                 }
                 allWordsInDocuments.add(tokenizedTerms);
             }
+            System.out.println("All sentence size is :"+allSentences.size());
         }
     }
 
