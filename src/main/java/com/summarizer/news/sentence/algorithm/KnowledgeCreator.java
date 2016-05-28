@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.summarizer.news.comparator.CategoryComparator;
 import com.summarizer.news.data.api.API_Client;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -19,7 +20,7 @@ import java.util.List;
  * Created by Ushan on 4/24/2016.
  */
 public class KnowledgeCreator {
-    private static final  String TEMPLATE_PATH =  "src/main/resources/template";
+    //private static final  String TEMPLATE_PATH =  "src/main/resources/template";
 
     public String generateKnowledge(String phrase) throws IOException {
         HashMap<String, ArrayList<JsonObject>> categories = extractEntites(phrase);
@@ -52,8 +53,10 @@ public class KnowledgeCreator {
     private String assignToTemplate(HashMap<String,ArrayList<JsonObject>> pickedEntities) throws IOException {
         //String  type = pickedEntities.get("Sport").get(0).get("text").getAsString();
         StringBuilder output = new StringBuilder();
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("template/cricket.txt").getFile());
         //if(type.equalsIgnoreCase("T20") || type.equalsIgnoreCase("Cricket") ){
-            Path path = Paths.get(TEMPLATE_PATH+"/cricket.txt");
+            Path path = Paths.get(file.getAbsolutePath());
             List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
             String firstLine = lines.get(0).replace("country1",pickedEntities.get("Country").get(0).get("text").getAsString());
             firstLine = firstLine.replace("country2",pickedEntities.get("Country").get(1).get("text").getAsString());
