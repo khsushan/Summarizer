@@ -1,10 +1,13 @@
 package com.summarizer.news.sentence.algorithm;
 
+import com.summarizer.news.comparator.SentenceComparator;
+import com.summarizer.news.model.Sentence;
 import com.summarizer.news.model.Word;
 import com.summarizer.news.sentence.extractor.SentenceExtractor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,13 +33,22 @@ public class SentenceScoreCalculator {
         init();
     }
 
-    public double[] getLexScore() {
+    private double[] getLexScore() {
         return this.lexScore;
     }
 
-    public List<String> getAllSentence() {
+    private List<String> getAllSentence() {
         return this.allSentences;
     }
+     public List<Sentence> getScoredSenetences(){
+         ArrayList<Sentence> sentences =  new ArrayList<Sentence>();
+         for (int i = 0; i < allSentences.size(); i++) {
+             sentences.add(new Sentence(allSentences.get(i), lexScore[i]));
+         }
+         SentenceComparator sentenceComparator = new SentenceComparator();
+         Collections.sort(sentences,sentenceComparator);
+         return  sentences;
+     }
 
     private void init() throws IOException, InterruptedException {
         for (StringBuilder document : documents) {
