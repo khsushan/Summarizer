@@ -1,6 +1,5 @@
 package com.summarizer.news.model;
 
-import com.sun.org.apache.xpath.internal.operations.String;
 
 import java.util.List;
 
@@ -13,6 +12,10 @@ public class Sentence {
     private List<Word> words;
     private double score;
 
+    public Sentence(String sentenceValue,double score){
+        this.sentenceValue =  sentenceValue;
+        this.score = score;
+    }
 
     public String getSentenceValue() {
         return sentenceValue;
