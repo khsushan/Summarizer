@@ -19,12 +19,10 @@ public class SentenceExtractor {
             new ArrayList<String>(); //this all words set will hold all the unique words in allWordsInDocuments
     private static List<String> allSentences = new ArrayList<String>();
     private static List<String> stopWords = null;
+    private static int documentCount = 0;
 
     public void getExtractedWordInGivenDocument(StringBuilder htmlContent) throws IOException, InterruptedException {
         if (htmlContent != null) {
-//            Reader reader = new StringReader(builder.toString());
-//            DocumentPreprocessor dp = new DocumentPreprocessor(reader);
-//            for (List<HasWord> sentence : dp) {
             Pattern re = Pattern.compile("[^.!?\\s][^.!?]*(?:[.!?](?!['\"]?\\s|$)[^.!?]*)*[.!?]?['\"]?(?=\\s|$)",
                     Pattern.MULTILINE | Pattern.COMMENTS);
             Matcher reMatcher = re.matcher(htmlContent.toString());
@@ -35,23 +33,20 @@ public class SentenceExtractor {
                 stopWords = StopwordLoader.getStopWords();
                 for (String term : tokenizedTerms) {
                     //avoid duplicate entry & stop words
-                    if (!uniqueWords.contains(term) && !stopWords.contains(term)) {
+                    if (!uniqueWords.contains(term) && !stopWords.contains(term.toLowerCase())) {
                         uniqueWords.add(term);
                     }
                 }
                 allWordsInDocuments.add(tokenizedTerms);
             }
-            System.out.println("All sentence size is :"+allSentences.size());
         }
+        documentCount++;
+        System.out.println("Senetence size : "+allSentences.size()+" and document count is : " +documentCount);
     }
 
     public List<String[]> getAllWordsInDocuments() { return this.allWordsInDocuments; }
 
-    public List<String> getUniqueWords() {
-        return this.uniqueWords;
-    }
+    public List<String> getUniqueWords() { return this.uniqueWords; }
 
-    public List<String> getAllSentences() {
-        return this.allSentences;
-    }
+    public List<String> getAllSentences() { return this.allSentences; }
 }
