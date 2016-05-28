@@ -26,11 +26,12 @@ public class SentenceExtractor {
             Pattern re = Pattern.compile("[^.!?\\s][^.!?]*(?:[.!?](?!['\"]?\\s|$)[^.!?]*)*[.!?]?['\"]?(?=\\s|$)",
                     Pattern.MULTILINE | Pattern.COMMENTS);
             Matcher reMatcher = re.matcher(htmlContent.toString());
+            stopWords = new StopwordLoader().getStopWords();
             while (reMatcher.find()) {
                 allSentences.add(reMatcher.group().toString());
                 String[] tokenizedTerms = reMatcher.group().toString().
                         replaceAll("[\\W&&[^\\s]]", "").split("\\W+");//to get individual terms
-                stopWords = StopwordLoader.getStopWords();
+
                 for (String term : tokenizedTerms) {
                     //avoid duplicate entry & stop words
                     if (!uniqueWords.contains(term) && !stopWords.contains(term.toLowerCase())) {
