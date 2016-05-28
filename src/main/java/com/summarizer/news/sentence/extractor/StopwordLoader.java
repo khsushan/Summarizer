@@ -15,9 +15,11 @@ import java.util.ArrayList;
  */
 public class StopwordLoader {
     private static ArrayList<String> stopwords;
-    private final static String textFilePath = "src/main/resources/stopword/english/Stopword.txt";
-    public static ArrayList<String> getStopWords() throws IOException, InterruptedException {
-        Path path = Paths.get(textFilePath);
+   // private final static String textFilePath = "src/main/resources/stopword/english/Stopword.txt";
+    public ArrayList<String> getStopWords() throws IOException, InterruptedException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("stopword/english/Stopword.txt").getFile());
+        Path path = Paths.get(file.getAbsolutePath());
         return (ArrayList<String>) Files.readAllLines(path, StandardCharsets.UTF_8);
     }
 
