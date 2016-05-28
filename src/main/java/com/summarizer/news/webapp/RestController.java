@@ -12,6 +12,7 @@ import com.summarizer.news.model.Sentence;
 import com.summarizer.news.sentence.algorithm.KnowledgeCreator;
 import com.summarizer.news.sentence.algorithm.SentenceScoreCalculator;
 import com.summarizer.news.sentence.algorithm.Vector;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.jsoup.HttpStatusException;
 
@@ -25,6 +26,10 @@ import java.util.List;
 
 @Path("/controller")
 public class RestController {
+    static {
+        BasicConfigurator.configure();
+    }
+
     private Logger logger = Logger.getLogger("RestController");
     @POST
     @Path("/test")
@@ -111,16 +116,18 @@ public class RestController {
     @Path("/getCreatedKnowledgeFromUrls")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public JSON_Responce getCreatedKnowledgeFromUrls(JSON_Request json_request){
+    public Response getCreatedKnowledgeFromUrls(JSON_Request json_request){
         JSON_Responce knowledge = null;
+        JsonObject jsonObject = new JsonObject();
         try {
             knowledge = createKnowledge(getNewsUrls(json_request, false));
+            jsonObject.addProperty("created_knolwdge",knowledge.getCreatedKnowledge());
         } catch (IOException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
         } catch (InterruptedException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
         }
-        return  knowledge;
+        return  Response.status(200).entity(jsonObject.toString()).build();
     }
 
     private  String[]  getNewsUrls(JSON_Request json_request, boolean isKeyword) throws IOException {
@@ -168,6 +175,7 @@ public class RestController {
         }
         KnowledgeCreator knowledgeCreator = new KnowledgeCreator();
         String createKnowldge = knowledgeCreator.generateKnowledge(selectedSenetences.toString());
+        logger.info(createKnowldge+"=================");
         return new JSON_Responce(createKnowldge);
     }
 }
