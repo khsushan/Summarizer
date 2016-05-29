@@ -48,7 +48,7 @@ public class API_Client {
     public static JsonArray getNewsUrls(String keyword) throws IOException {
 //        StringBuilder builder = httpClient("https://ajax.googleapis.com/ajax/services/search/news?" +
 //                "v=1.0&q="+keyword+"&userip=INSERT-USER-IP");
-        String bingUrlPattern = "https://api.datamarket.azure.com/Bing/Search/News?Query=%%27%s%%27&$format=JSON";
+        String bingUrlPattern = "https://api.datamarket.azure.com/Bing/Search/Web?Query=%%27%s%%27&$format=JSON";
         String query = URLEncoder.encode(keyword, Charset.defaultCharset().name());
         String url =   String.format(bingUrlPattern, query);
         StringBuilder builder = httpClient(url,
