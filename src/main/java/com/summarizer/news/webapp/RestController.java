@@ -112,16 +112,16 @@ public class RestController {
         return  Response.status(200).entity(jsonObject.toString()).build();
     }
 
-    private  StringBuilder[] getNewsDocuments(JSON_Request json_request, boolean isKeyword) throws IOException {
+    private  StringBuilder[] getNewsDocuments(JSON_Request json_request, boolean isKeyword) throws IOException, InterruptedException {
         String[] newsUrls = null;
         if(isKeyword){
             ArrayList<String> urls = new ArrayList<String>();
             JsonArray newsUrlsFromKeyword = API_Client.getNewsUrls(json_request.getKeyword());
-            for(int i = 0;i<newsUrlsFromKeyword.size();i++){
-                if(Analyzer.analalyzeTitle(json_request.getKeyword(),
-                        newsUrlsFromKeyword.get(i).getAsJsonObject().get("Title").getAsString())){
+            for(int i = 0;i<3;i++){
+                //if(Analyzer.analalyzeTitle(json_request.getKeyword(),
+                  //      newsUrlsFromKeyword.get(i).getAsJsonObject().get("Title").getAsString())){
                         urls.add(newsUrlsFromKeyword.get(i).getAsJsonObject().get("Url").getAsString());
-                }
+                //}
             }
             newsUrls = new String[urls.size()];
             for (int i = 0;i < newsUrls.length ; i++) {
@@ -136,6 +136,7 @@ public class RestController {
             try {
                 if(url != null) {
                     StringBuilder htmlContent = API_Client.getHTMLContent(url);
+                    Thread.sleep(1000);
                     if (htmlContent != null) {
                         documents[i] = htmlContent;
                         i++;
