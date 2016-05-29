@@ -5,16 +5,14 @@ package com.summarizer.news.webapp;
  */
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.summarizer.news.comparator.SentenceComparator;
 import com.summarizer.news.data.api.API_Client;
 import com.summarizer.news.data.html.HtmlReader;
 import com.summarizer.news.model.Sentence;
+import com.summarizer.news.sentence.algorithm.Analyzer;
 import com.summarizer.news.sentence.algorithm.KnowledgeCreator;
 import com.summarizer.news.sentence.algorithm.SentenceScoreCalculator;
-import com.summarizer.news.sentence.algorithm.Vector;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.jsoup.HttpStatusException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -51,7 +49,6 @@ public class RestController {
             e.printStackTrace();
         }
 //        double[] lexScore = sentenceScoreCalculator.getLexScore();
-//
 //        Vector.printVector(sentenceScoreCalculator.getLexScore());
 //        List<String> allSentence = sentenceScoreCalculator.getAllSentence();
 //        for (int i = 0; i < allSentence.size();i++){
@@ -65,51 +62,44 @@ public class RestController {
     @Path("/getScoredSentences")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getScoredSentences(JSON_Request json_request){
-
-//        StringBuilder output = new StringBuilder();
-//        String[] requestUrls = json_request.getUrls();
-//        StringBuilder[] documents = new StringBuilder[requestUrls.length];
-//        try {
-//            for(int i = 0; i < documents.length;i++){
-//                StringBuilder  htmlContent = HtmlReader.readHTML(requestUrls[i]);
-//                documents[i] =  htmlContent;
-//            }
-//        } catch (IOException e) {
-//            logger.error("Error while reading html content"+e.getMessage());
-//        }
-//        SentenceScoreCalculator sentenceScoreCalculator = null;
-//        try {
-//            sentenceScoreCalculator = new SentenceScoreCalculator(documents);
-//        } catch (IOException e) {
-//            logger.error("Error while calculating senetence score "+e.getMessage());
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        double[] lexScore = sentenceScoreCalculator.getLexScore();
-//
-//        Vector.printVector(sentenceScoreCalculator.getLexScore());
-//        List<String> allSentence = sentenceScoreCalculator.getAllSentence();
-//        for (int i = 0; i < allSentence.size();i++){
-//            output.append(allSentence.get(i)+"======================="+lexScore[i]+"\n");
-//            output.append("\n");
-//        }
+        JsonObject jsonObject = new JsonObject();
+        try {
+            SentenceScoreCalculator sentenceScoreCalculator =
+                    new SentenceScoreCalculator(getNewsDocuments(json_request, false));
+            List<Sentence> scoredSenetences = sentenceScoreCalculator.getScoredSenetences();
+        } catch (IOException e) {
+            logger.error("Error while calculating senetence score "+e.getMessage());
+            jsonObject.addProperty("error",true);
+            jsonObject.addProperty("error_message",e.getMessage());
+        } catch (InterruptedException e) {
+            logger.error("Error while calculating senetence score "+e.getMessage());
+            jsonObject.addProperty("error",true);
+            jsonObject.addProperty("error_message",e.getMessage());
+        }
         return Response.status(200).entity("").build();
-
     }
 
     @POST
     @Path("/getCreatedKnowledgeFromKeyword")
     @Consumes(MediaType.APPLICATION_JSON)
-    public JSON_Responce getCreatedKnowledge(JSON_Request json_request){
+    public Response getCreatedKnowledgeFromKeyword(JSON_Request json_request){
         JSON_Responce knowledge = null;
+        JsonObject jsonObject = new JsonObject();
         try {
-            knowledge = createKnowledge(getNewsUrls(json_request, true));
+            knowledge = createKnowledge(getNewsDocuments(json_request, true));
+            jsonObject.addProperty("Created Knowledge",knowledge.getCreatedKnowledge());
         } catch (IOException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
+            jsonObject.addProperty("error",true);
+            jsonObject.addProperty("error_message",e.getMessage());
+            return  Response.status(500).entity(jsonObject.toString()).build();
         } catch (InterruptedException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
+            jsonObject.addProperty("error",true);
+            jsonObject.addProperty("error_message",e.getMessage());
+            return  Response.status(500).entity(jsonObject.toString()).build();
         }
-        return  knowledge;
+        return  Response.status(200).entity(jsonObject.toString()).build();
     }
 
     @POST
@@ -120,46 +110,59 @@ public class RestController {
         JSON_Responce knowledge = null;
         JsonObject jsonObject = new JsonObject();
         try {
-            knowledge = createKnowledge(getNewsUrls(json_request, false));
+            knowledge = createKnowledge(getNewsDocuments(json_request, false));
             jsonObject.addProperty("created_knolwdge",knowledge.getCreatedKnowledge());
         } catch (IOException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
+            jsonObject.addProperty("error",true);
+            jsonObject.addProperty("error_message",e.getMessage());
+            return  Response.status(500).entity(jsonObject.toString()).build();
         } catch (InterruptedException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
+            jsonObject.addProperty("error",true);
+            jsonObject.addProperty("error_message",e.getMessage());
+            return  Response.status(500).entity(jsonObject.toString()).build();
         }
         return  Response.status(200).entity(jsonObject.toString()).build();
     }
 
-    private  String[]  getNewsUrls(JSON_Request json_request, boolean isKeyword) throws IOException {
-        StringBuilder output = new StringBuilder();
+    private  StringBuilder[] getNewsDocuments(JSON_Request json_request, boolean isKeyword) throws IOException {
         String[] newsUrls = null;
-        StringBuilder[] documents = null;
         if(isKeyword){
+            ArrayList<String> urls = new ArrayList<String>();
             JsonArray newsUrlsFromKeyword = API_Client.getNewsUrls(json_request.getKeyword());
-            newsUrls = new String[newsUrlsFromKeyword.size()];
             for(int i = 0;i<newsUrlsFromKeyword.size();i++){
-                newsUrls[i] = newsUrlsFromKeyword.get(i).getAsJsonObject().get("Url").getAsString();
+                if(Analyzer.analalyzeTitle(json_request.getKeyword(),
+                        newsUrlsFromKeyword.get(i).getAsJsonObject().get("Title").getAsString())){
+                        urls.add(newsUrlsFromKeyword.get(i).getAsJsonObject().get("Url").getAsString());
+                }
+            }
+            newsUrls = new String[urls.size()];
+            for (int i = 0;i < newsUrls.length ; i++) {
+                newsUrls[i] =  urls.get(i);
             }
         }else{
             newsUrls =  json_request.getUrls();
         }
-        return newsUrls;
-    }
-
-    private JSON_Responce createKnowledge(String[] urls) throws IOException, InterruptedException {
-        StringBuilder[] documents = new StringBuilder[urls.length];
+        StringBuilder[] documents = new StringBuilder[newsUrls.length];
         int i = 0;
-        for (String url: urls) {
+        for (String url: newsUrls) {
             try {
-                StringBuilder htmlContent = API_Client.getHTMLContent(url);
-                if(htmlContent !=  null){
-                    documents[i] = htmlContent;
-                    i++;
+                if(url != null) {
+                    StringBuilder htmlContent = API_Client.getHTMLContent(url);
+                    if (htmlContent != null) {
+                        documents[i] = htmlContent;
+                        i++;
+                    }
                 }
             } catch (IOException e) {
                 logger.error("Error while reading html document "+e.getMessage());
             }
         }
+        return documents;
+    }
+
+    private JSON_Responce createKnowledge(StringBuilder[] documents) throws IOException, InterruptedException {
         SentenceScoreCalculator  sentenceScoreCalculator = new SentenceScoreCalculator(documents);
         List<Sentence> scoredSenetences = sentenceScoreCalculator.getScoredSenetences();
         int incrementer  = 0;
@@ -173,9 +176,11 @@ public class RestController {
                 incrementer++;
             }
         }
-        KnowledgeCreator knowledgeCreator = new KnowledgeCreator();
+        KnowledgeCreator knowledgeCreator = new KnowledgeCreator(Analyzer.analyzeSport(scoredSenetences));
         String createKnowldge = knowledgeCreator.generateKnowledge(selectedSenetences.toString());
-        logger.info(createKnowldge+"=================");
+        logger.info("Created Knowledge is :"+createKnowldge);
         return new JSON_Responce(createKnowldge);
     }
+
+
 }
