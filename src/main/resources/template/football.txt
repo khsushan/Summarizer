@@ -1,3 +1,2 @@
-The match between country 1 and country2
+The football match between country1 and country2
 The country won the match by goals
-The man of the match is person
