@@ -3,6 +3,7 @@ package com.summarizer.news.webapp;
 /**
  * Created by ushan on 3/24/16.
  */
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.summarizer.news.data.api.API_Client;
@@ -13,6 +14,10 @@ import com.summarizer.news.sentence.algorithm.KnowledgeCreator;
 import com.summarizer.news.sentence.algorithm.SentenceScoreCalculator;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.util.JSONPObject;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -29,54 +34,35 @@ public class RestController {
     }
 
     private Logger logger = Logger.getLogger("RestController");
-    @POST
-    @Path("/test")
-    @Consumes("text/plain")
-    public Response getMessage(String url) {
-        StringBuilder output = new StringBuilder();
-        StringBuilder htmlContent = null;
-        try {
-            htmlContent = HtmlReader.readHTML(url);
-        } catch (IOException e) {
-            logger.error("Error while reading html content "+e.getMessage());
-        }
-        SentenceScoreCalculator sentenceScoreCalculator = null;
-        try {
-            sentenceScoreCalculator = new SentenceScoreCalculator(new StringBuilder[]{htmlContent});
-        } catch (IOException e) {
-            logger.error("Error while calculating score "+e.getMessage());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-//        double[] lexScore = sentenceScoreCalculator.getLexScore();
-//        Vector.printVector(sentenceScoreCalculator.getLexScore());
-//        List<String> allSentence = sentenceScoreCalculator.getAllSentence();
-//        for (int i = 0; i < allSentence.size();i++){
-//            output.append(allSentence.get(i)+"======================="+lexScore[i]+"\n");
-//            output.append("\n");
-//        }
-        return Response.status(200).entity(output.toString()).build();
-    }
 
     @POST
     @Path("/getScoredSentences")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getScoredSentences(JSON_Request json_request){
-        JsonObject jsonObject = new JsonObject();
+        JsonObject errorObject = new JsonObject();
+        JSONObject responceObject  = new JSONObject();
         try {
             SentenceScoreCalculator sentenceScoreCalculator =
                     new SentenceScoreCalculator(getNewsDocuments(json_request, false));
-            List<Sentence> scoredSenetences = sentenceScoreCalculator.getScoredSenetences();
+            ArrayList<Sentence> scoredSenetences =(ArrayList<Sentence>) sentenceScoreCalculator.getScoredSenetences();
+            JSONArray jsonArray =  new JSONArray(new Gson().toJson(scoredSenetences));
+            responceObject.put("scored_Sentences",jsonArray);
         } catch (IOException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
-            jsonObject.addProperty("error",true);
-            jsonObject.addProperty("error_message",e.getMessage());
+            errorObject.addProperty("error",true);
+            errorObject.addProperty("error_message",e.getMessage());
+            return Response.status(500).entity(errorObject.toString()).build();
         } catch (InterruptedException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
-            jsonObject.addProperty("error",true);
-            jsonObject.addProperty("error_message",e.getMessage());
+            errorObject.addProperty("error",true);
+            errorObject.addProperty("error_message",e.getMessage());
+            return Response.status(500).entity(errorObject.toString()).build();
+        } catch (JSONException e) {
+            errorObject.addProperty("error",true);
+            errorObject.addProperty("error_message",e.getMessage());
+            return Response.status(500).entity(errorObject.toString()).build();
         }
-        return Response.status(200).entity("").build();
+        return Response.status(200).entity(responceObject.toString()).build();
     }
 
     @POST
