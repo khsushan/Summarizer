@@ -72,6 +72,7 @@ public class RestController {
         JSON_Responce knowledge = null;
         JsonObject jsonObject = new JsonObject();
         try {
+            logger.info(json_request.getKeyword()+"=======================");
             knowledge = createKnowledge(getNewsDocuments(json_request, true));
             jsonObject.addProperty("Created Knowledge",knowledge.getCreatedKnowledge());
         } catch (IOException e) {
@@ -117,6 +118,7 @@ public class RestController {
         if(isKeyword){
             ArrayList<String> urls = new ArrayList<String>();
             JsonArray newsUrlsFromKeyword = API_Client.getNewsUrls(json_request.getKeyword());
+            logger.info(newsUrlsFromKeyword.size()+" : "+json_request.getKeyword());
             for(int i = 0;i<3;i++){
                 //if(Analyzer.analalyzeTitle(json_request.getKeyword(),
                   //      newsUrlsFromKeyword.get(i).getAsJsonObject().get("Title").getAsString())){
@@ -126,6 +128,7 @@ public class RestController {
             newsUrls = new String[urls.size()];
             for (int i = 0;i < newsUrls.length ; i++) {
                 newsUrls[i] =  urls.get(i);
+                logger.info(i+":"+newsUrls[i]);
             }
         }else{
             newsUrls =  json_request.getUrls();
@@ -136,7 +139,6 @@ public class RestController {
             try {
                 if(url != null) {
                     StringBuilder htmlContent = API_Client.getHTMLContent(url);
-                    Thread.sleep(1000);
                     if (htmlContent != null) {
                         documents[i] = htmlContent;
                         i++;
