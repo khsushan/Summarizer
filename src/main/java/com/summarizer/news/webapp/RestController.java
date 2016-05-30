@@ -45,8 +45,24 @@ public class RestController {
             SentenceScoreCalculator sentenceScoreCalculator =
                     new SentenceScoreCalculator(getNewsDocuments(json_request, false));
             ArrayList<Sentence> scoredSenetences =(ArrayList<Sentence>) sentenceScoreCalculator.getScoredSenetences();
-            JSONArray jsonArray =  new JSONArray(new Gson().toJson(scoredSenetences));
-            responceObject.put("scored_Sentences",jsonArray);
+
+            if(json_request.getMax_count() > 0){
+                int iterator = 1;
+                ArrayList<Sentence> responseSenetences = new ArrayList<Sentence>();
+                for (Sentence sentence :  scoredSenetences) {
+                    if(iterator <= json_request.getMax_count()){
+                        responseSenetences.add(sentence);
+                    }else {
+                        break;
+                    }
+                    iterator++;
+                }
+                JSONArray jsonArray = new JSONArray(new Gson().toJson(responseSenetences));
+                responceObject.put("scored_Sentences", jsonArray);
+            }else {
+                JSONArray jsonArray = new JSONArray(new Gson().toJson(scoredSenetences));
+                responceObject.put("scored_Sentences", jsonArray);
+            }
         } catch (IOException e) {
             logger.error("Error while calculating senetence score "+e.getMessage());
             errorObject.addProperty("error",true);
