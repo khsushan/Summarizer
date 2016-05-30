@@ -88,15 +88,15 @@ public class KnowledgeCreator {
             String firstLine = lines.get(0).replace("country1", pickedEntities.get("Country").get(0).get("text").getAsString());
             firstLine = firstLine.replace("country2", pickedEntities.get("Country").get(1).get("text").getAsString());
             output.append(firstLine);
-            output.append("\n");
+            output.append(".");
             String secondLine = lines.get(1);
             secondLine = secondLine.replace("country", pickedEntities.get("Country").get(0).get("text").getAsString());
             output.append(secondLine);
-            output.append("\n");
+            output.append(".");
             String thirdLine = lines.get(2);
             thirdLine = thirdLine.replace("person", pickedEntities.get("Person").get(0).get("text").getAsString());
             output.append(thirdLine);
-            output.append("\n");
+            output.append(".");
         }else if(type.equals("Foot Ball")){
             File file = new File(classLoader.getResource("template/football.txt").getFile());
             Path path = Paths.get(file.getAbsolutePath());
@@ -111,12 +111,12 @@ public class KnowledgeCreator {
             String firstLine = lines.get(0).replace("country1", pickedEntities.get("Country").get(0).get("text").getAsString());
             firstLine = firstLine.replace("country2", pickedEntities.get("Country").get(1).get("text").getAsString());
             output.append(firstLine);
-            output.append("\n");
+            output.append(".");
             String secondLine = lines.get(1);
             secondLine = secondLine.replace("country", pickedEntities.get("Country").get(0).get("text").getAsString());
             secondLine = secondLine.replace("goals",score);
             output.append(secondLine);
-            output.append("\n");
+            output.append(".");
         }
 
         return  output;
