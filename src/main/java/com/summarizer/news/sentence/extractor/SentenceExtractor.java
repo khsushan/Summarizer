@@ -14,12 +14,12 @@ import java.util.regex.Pattern;
  * Created by ushan on 3/5/16.
  */
 public class SentenceExtractor {
-    private static List<String[]> allWordsInDocuments = new ArrayList<String[]>(); //this will hold all the words in document
-    private static List<String> uniqueWords =
+    private List<String[]> allWordsInDocuments = new ArrayList<String[]>(); //this will hold all the words in document
+    private List<String> uniqueWords =
             new ArrayList<String>(); //this all words set will hold all the unique words in allWordsInDocuments
-    private static List<String> allSentences = new ArrayList<String>();
-    private static List<String> stopWords = null;
-    private static int documentCount = 0;
+    private List<String> allSentences = new ArrayList<String>();
+    private List<String> stopWords = null;
+    private int documentCount = 0;
 
     public void getExtractedWordInGivenDocument(StringBuilder htmlContent) throws IOException, InterruptedException {
         if (htmlContent != null) {
